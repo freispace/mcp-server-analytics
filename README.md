@@ -1,6 +1,6 @@
 # freispace MCP Server
 
-A Model Context Protocol (MCP) server that provides comprehensive analytics and insights for the [scheduling software freispace](https://freispace.com). This server enables AI assistants (e.g. Copilot, Gemini) to query data within freispace, such as project statistics and planning related information.
+A Model Context Protocol (MCP) server that provides analytics and insights for the [scheduling software freispace](https://freispace.com). This server enables AI assistants (e.g. Copilot, Gemini) to query data within freispace, such as project statistics and planning related information.
 
 ## Overview
 
@@ -12,174 +12,171 @@ Our MCP Server always respects user permissions, ensuring that the LLM will only
 
 Example queries might be "Who worked with Person X in the past" or "How many vacation days do I have left?"
 
-## Features
-
-- **Staff Management**: Complete staff directory, collaboration analysis, and holiday tracking
-- **Project Analytics**: Project status, team composition, and performance metrics
-- **Resource Management**: Suite, resource, and staff availability tracking
-- **Holiday Planning**: Holiday quota management and upcoming absence tracking
-- **Collaboration Insights**: Team dynamics and working relationship analysis
-
 ## Prerequisites
 
 1. [freispace Flagship](https://freispace.com/pricing) account
 2. Valid MCP API key for freispace
     - During `beta`, contact your freispace support team to obtain an MCP API key
 
-
 ## Available Tools
 
-### 1. Staff Directory (`staffs_query`)
+All lookups are name-based. Partial names match; the first match is used.
 
-Retrieves comprehensive information about all staff members in the organization.
+### `get_current_user`
 
-**Use Cases**:
-- Get overview of all employees
-- Understand organizational structure
-- Find staff members by role or department
-- Generate staff reports
+Who the calling user is: name, email and linked staff record. No arguments. Use it to resolve "I"/"me"/"my" to a staff name.
 
-**Example Queries**:
-- "List all staff members"
-- "Who are the developers in the company?"
-- "Show me the organizational structure"
+> "Who am I logged in as?"
 
-### 2. Staff Collaboration Analysis (`staffs_worked_together_query`)
+### `get_staffs`
 
-Analyzes collaboration patterns and working relationships for specific staff members.
+List staff members with name, title and staff number.
 
-**Parameters**:
-- `name` (required): Staff member name
+- `status` (optional): `active` (default), `inactive`, `all`
 
-**Use Cases**:
-- Analyze team dynamics
-- Find collaboration patterns
-- Understand project participation
-- Generate collaboration reports
+> "List all staff members" · "Who are the developers in the company?"
 
-**Example Queries**:
-- "Who has John worked with on projects?"
-- "Show collaboration history for Sarah"
-- "Analyze team relationships"
+### `find_resources`
 
-### 3. Holiday Management
+Search rooms/studios (suites), equipment/licenses (resources) and staff by name in one call, grouped by type.
 
-#### Next Holidays (`staffs_next_holidays_query`)
-Shows upcoming holiday information for staff members.
+- `search` (optional): name or partial name; omit to list everything
+- `staff` (optional): `internal` or `external`
+- `site` (optional): only suites at matching sites
+- `status` (optional): `active` (default), `inactive`, `all`
 
-**Parameters**:
-- `name` (optional): Staff member name (defaults to user's assigned staff)
+> "Find Sammy" · "List external freelancers"
 
-**Use Cases**:
-- Plan around staff availability
-- Check upcoming absences
-- Holiday scheduling
+### `get_availability`
 
-**Example Queries**:
-- "When is John's next holiday?"
-- "Show upcoming holidays"
-- "Who's going on holiday soon?"
+Check when staff, suites or resources are free in a date window (default 14 days, max 92), considering bookings, public holidays and staff absences/work times.
 
-#### Holiday Quota (`staffs_holidays_left_query`)
-Tracks remaining holiday days for staff members.
+- `type` (required): `staff`, `resource`, `suite` or `site`
+- `search`, `staff`, `site`, `status` (optional): entity selection as in `find_resources`
+- `from`, `to`, `days`, `weeks` (optional): the date window
+- `duration` + `duration_unit` (optional): required free length (`minutes`, `hours` or `days`)
 
-**Parameters**:
-- `name` (optional): Staff member name
-- `year` (optional): Year to query (defaults to current year)
+> "Is a studio free next Tuesday for 3 hours?" · "Who has 2 fully-free days in the next two weeks?"
 
-**Use Cases**:
-- Monitor holiday usage
-- Plan holiday requests
-- Resource planning
+### `get_my_schedule`
 
-**Example Queries**:
-- "How many holiday days does Sarah have left?"
-- "Show holiday quota for 2024"
-- "Who has the most holiday days remaining?"
+The calling user's own bookings in a date window (default: next 7 days).
 
-### 4. Project Analytics
+- `from`, `to`, `days`, `weeks` (optional): the date window
 
-#### Project Status (`get_project_status`)
-Provides comprehensive project performance and booking statistics.
+> "What's on my schedule this week?"
 
-**Parameters**:
-- `name` (required): Project name
+### `get_my_tasks`
 
-**Use Cases**:
-- Analyze project performance
-- Track booking patterns
-- Generate project reports
-- Monitor project activity
+Tasks assigned to the calling user, with due date, priority and reference.
 
-**Example Queries**:
-- "Show status for Project Alpha"
-- "Analyze booking patterns for the mobile app project"
-- "Generate project performance report"
+- `include_done` (optional): also include completed tasks
 
-#### Project Team (`get_staffs_worked_on_project`)
-Lists all staff members who have worked on a specific project.
+> "What are my open tasks?"
 
-**Parameters**:
-- `name` (required): Project name
+### `get_open_tasks`
 
-**Use Cases**:
-- Identify project team members
-- Analyze team composition
-- Track project participation
-- Generate team reports
+All open tasks of the team, with assignees.
 
-**Example Queries**:
-- "Who worked on the website redesign?"
-- "Show team members for Project Beta"
-- "Analyze project team composition"
+- `reference` (optional): `project`, `booking` or `user`
 
-#### Staff Projects (`get_staff_projects`)
-Shows all projects assigned to a specific staff member.
+> "Which project tasks are still open?"
 
-**Parameters**:
-- `name` (required): Staff member name
+### `get_staff_projects`
 
-**Use Cases**:
-- Understand staff workload
-- Analyze project assignments
-- Track staff project portfolio
-- Resource allocation planning
+List the projects a staff member is booked on, with date range and duration.
 
-**Example Queries**:
-- "What projects is John working on?"
-- "Show Sarah's project assignments"
-- "Analyze staff workload distribution"
+- `staff_name` (required)
 
-### 5. Resource Search (`get_entities_by_name`)
+> "What projects is Karl booked on?"
 
-Searches for suites, resources, and staff members by name with availability filtering.
+### `get_staff_collaborators`
 
-**Parameters**:
-- `name` (required): Search term
-- `available_only` (optional): Show only available entities
-- `booked_only` (optional): Show only booked entities
+Show who a staff member has worked with, based on shared bookings.
 
-**Use Cases**:
-- Find available resources
-- Search for specific entities
-- Check availability status
-- Resource planning
+- `staff_name` (required)
 
-**Example Queries**:
-- "Find available meeting rooms"
-- "Search for camera equipment"
-- "Show booked resources for today"
+> "Who has Alexander worked with?"
+
+### `get_staff_next_holiday`
+
+Get a staff member's next upcoming holiday (start, end, length, comment).
+
+- `staff_name` (optional; omit for the calling user)
+
+> "When is my next holiday?" · "When is Hendrikje on holiday?"
+
+### `get_staff_holiday_quota`
+
+Get a staff member's holiday quota for one year: total, taken and remaining days.
+
+- `staff_name` (optional; omit for the calling user)
+- `year` (optional; defaults to the current year)
+
+> "How many vacation days do I have left?"
+
+### `get_project_stats`
+
+Booking statistics for one project: past vs upcoming bookings with per-status breakdown.
+
+- `project_name` (required)
+
+> "Show booking stats for Project Alpha"
+
+### `get_project_team`
+
+List the staff members who worked on a project, with their number of bookings on it.
+
+- `project_name` (required)
+
+> "Who worked on the website redesign?"
+
+### `get_project_tasks`
+
+Task status of one project: all tasks on the project and its bookings, with an open/done/overdue summary.
+
+- `project_name` (required)
+
+> "Are there open tasks on the documentary project?"
+
+### `get_invoices`
+
+List invoices with filters and per-currency totals; paginated. Status buckets: `draft`, `open`, `overdue`, `paid`, `partially-paid`, `canceled`, `locked`.
+
+- `search` (optional): matches number, order number, subject, recipient address
+- `status`, `number`, `date_min`/`date_max`, `due_date_min`/`due_date_max`, `sum_min`/`sum_max`, `outstanding_min`/`outstanding_max`, `sort`, `order`, `page`, `per_page` (optional)
+
+> "Which invoices are overdue?" · "Open invoices for Acme"
+
+### `get_offers`
+
+List offers (quotes) with filters and per-currency net totals; paginated. Status buckets: `draft`, `locked`, `open`, `accepted`, `declined`.
+
+- `search`, `status`, `number`, `date_min`/`date_max`, `sum_min`/`sum_max`, `sort`, `order`, `page`, `per_page` (optional)
+
+> "Show declined offers from this year"
+
+### `get_orders`
+
+List orders (jobs) with their connected offers and invoices inline; paginated.
+
+- `search` (optional): matches order number and name
+- `status`, `number`, `date_min`/`date_max`, `sort`, `order`, `page`, `per_page` (optional)
+
+> "What was quoted and billed on order 2026-014?"
+
+### `search_docs`
+
+Search the freispace documentation and return the most relevant excerpts.
+
+- `query` (required)
+- `limit` (optional): max excerpts, default 5
+
+> "How do I set up shift planning in freispace?"
 
 ## Error Handling
 
-The server includes comprehensive error handling for:
-- API connectivity issues
-- Invalid parameters
-- Missing data
-- Authentication failures
-- Network timeouts
-
-All errors are logged with detailed information for debugging.
+Errors are returned to the calling model as short, actionable messages (e.g. `Not found (404): Staff member with name 'X' not found. Call get_staffs to list valid staff names.`). Diagnostics are logged to stderr; stdout carries only the MCP protocol.
 
 ## ⚠️ Beta Notice
 

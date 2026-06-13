@@ -1,9 +1,6 @@
 export interface Config {
   apiKey?: string;
 }
-export interface Config {
-  apiKey?: string;
-}
 
 const parseArguments = (): Config => {
   const config: Config = {};

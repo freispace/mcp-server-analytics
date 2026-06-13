@@ -1,6 +1,6 @@
 {
   "name": "@freispace/mcp-server-analytics",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A Model Context Protocol server for analytical queries on the freispace platform.",
   "license": "MIT",
   "author": "freispace GmbH (https://freispace.com)",
@@ -40,10 +40,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.15",
-    "@modelcontextprotocol/inspector": "^0.21.2",
-    "@types/node": "^25.9.1",
+    "@biomejs/biome": "^2.4.16",
+    "@modelcontextprotocol/inspector": "^0.22.0",
+    "@types/node": "^25.9.3",
     "globals": "^17.6.0",
-    "typescript-eslint": "^8.59.4"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.0"
   }
 }
