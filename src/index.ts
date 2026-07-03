@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "node:fs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { FindResourcesTool } from "./tools/find-resources.js";
@@ -21,7 +22,10 @@ import { GetStaffProjectsTool } from "./tools/get-staff-projects.js";
 import { GetStaffsTool } from "./tools/get-staffs.js";
 import { SearchDocsTool } from "./tools/search-docs.js";
 
-const VERSION = "2.0.0";
+// Single source of truth for the version is package.json.
+const VERSION: string = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+).version;
 const server = new McpServer({
   name: "freispace",
   version: VERSION,
