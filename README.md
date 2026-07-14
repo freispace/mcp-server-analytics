@@ -117,11 +117,11 @@ Get a staff member's holiday quota for one year: total, taken and remaining days
 
 ### `get_project_stats`
 
-Booking statistics for one project: past vs upcoming bookings with per-status breakdown.
+Booking statistics for one project: past vs upcoming bookings with per-status breakdown, plus the project timespan (first booking start, last booking end and the duration in days between them).
 
 - `project_name` (required)
 
-> "Show booking stats for Project Alpha"
+> "Show booking stats for Project Alpha" · "How long does Project Alpha run?"
 
 ### `get_project_team`
 

@@ -25,7 +25,6 @@ type Args = z.infer<typeof schema>;
 interface HolidayBlock {
   start: string;
   end: string;
-  /** Weighted vacation days consumed (full day = 1, half day = 0.5). */
   days: number;
   calendar_days: number;
   comment?: string | null;
@@ -37,7 +36,6 @@ interface Response {
   on_holiday_today?: boolean;
   next_work_day?: string | null;
   holidays?: HolidayBlock[];
-  // Flat mirror of holidays[0] (back-compat with older API versions).
   start?: string | null;
   end?: string | null;
   length?: number | null;
@@ -67,7 +65,6 @@ export class GetStaffNextHolidayTool extends BaseTool {
     const { data } = await freispaceClient.get<Response>(endpoint);
     const who = data.staff?.display_name || args?.staff_name || "This user";
 
-    // Fall back to the flat mirror when talking to an older API version.
     const blocks: HolidayBlock[] =
       data.holidays ??
       (data.start

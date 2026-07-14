@@ -4,7 +4,9 @@ import { freispaceClient } from "../utils/http-client.js";
 
 const TOOL_NAME = "get_project_stats";
 const TOOL_DESCRIPTION =
-  "Booking statistics for one project: how many bookings are in the past vs upcoming, with a per-status breakdown.";
+  "Booking statistics for one project: how many bookings are in the past vs upcoming, with a per-status breakdown. " +
+  "Also returns the project timespan: when the first booking starts, when the last booking ends (local date + time) " +
+  "and the duration in days between them.";
 
 const schema = z.object({
   project_name: z
@@ -28,6 +30,10 @@ interface Response {
     byline?: string | null;
     description?: string | null;
   };
+  timezone?: string;
+  first_booking_start?: string | null;
+  last_booking_end?: string | null;
+  duration_days?: number | null;
   bookings_past: BookingStats;
   bookings_future: BookingStats;
 }
@@ -65,6 +71,17 @@ export class GetProjectStatsTool extends BaseTool {
     text += `\n`;
     if (data.project?.description?.trim()) {
       text += `${data.project.description.trim()}\n`;
+    }
+    if (data.first_booking_start && data.last_booking_end) {
+      text += `First booking starts ${data.first_booking_start}, last booking ends ${data.last_booking_end}`;
+      if (data.timezone) text += ` (${data.timezone})`;
+      if (typeof data.duration_days === "number") {
+        text +=
+          data.duration_days === 0
+            ? " — less than a day between them"
+            : ` — ${data.duration_days} day${data.duration_days === 1 ? "" : "s"} between them`;
+      }
+      text += `.\n`;
     }
     text += statusLine("Past", data.bookings_past);
     text += statusLine("Upcoming", data.bookings_future);
