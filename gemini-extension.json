@@ -1,0 +1,19 @@
+{
+	"name": "freispace-mcp",
+	"version": "2.2.0",
+	"description": "Analytical queries on freispace via the freispace Analytics MCP server.",
+	"settings": [
+		{
+			"name": "freispace MCP secret",
+			"description": "Your freispace MCP Server secret key (starts with \"ai-\"). Generated in the freispace team settings.",
+			"envVar": "FREISPACE_API_KEY",
+			"sensitive": true
+		}
+	],
+	"mcpServers": {
+		"freispace-analytics": {
+			"command": "npx",
+			"args": ["--yes", "@freispace/mcp-server-analytics@latest"]
+		}
+	}
+}
